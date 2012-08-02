@@ -13,6 +13,8 @@ jQuery(function ($) {
   }
 
   var colors = [ '#000099', '#ed561b' ];
+  var current_data;
+  var current_driver;
 
   // these are called by the amortizer to calculate each payment
   // the init/calculate functions are called with this === loan, first parameter === payment row
@@ -222,7 +224,13 @@ jQuery(function ($) {
     if ( !isFinite( x_max ) ) { x_max = 10; }
     if ( !isFinite( x_min ) ) { x_min = 0; }
 
-    var w = 500
+    var fit_space = $( '#col2' ).innerWidth();
+
+    var margin_top = 35
+      , margin_right = 10
+      , margin_bottom = 20
+      , margin_left = 65
+      , w = fit_space - (margin_left + margin_right) // 480
       , aspect = 1 / 1.618
       , h = w * aspect
       , x_scale = pv.Scale.linear( x_min, x_max )
@@ -244,16 +252,16 @@ jQuery(function ($) {
         //.fillStyle('#ddd')
         .width( w )
         .height( w * aspect )
-        .bottom( 20 )
-        .left( 80 )
-        .right( 10 )
-        .top( 35 )
+        .bottom( margin_bottom )
+        .left( margin_left )
+        .right( margin_right )
+        .top( margin_top )
         ;
 
     vis.add(pv.Label)
-        .text( display_driver.title || "TITLE MISSING" )
+        .text( display_driver.title )
         .top( 0 )
-        .textMargin( 8 )
+        .textMargin( 10 )
         .textAlign( 'center' )
         .font( '16px sans-serif')
         ;
@@ -342,11 +350,11 @@ jQuery(function ($) {
 
     // UI
     var display_driver_id = $('#display_driver').val();
-    var display_driver = display_drivers[ display_driver_id ];
+    current_driver = display_drivers[ display_driver_id ];
 
     $( '.context_controls' ).hide();
-    if ( display_driver.extra_controls ) {
-      $( '#' + display_driver.extra_controls ).show();
+    if ( current_driver.extra_controls ) {
+      $( '#' + current_driver.extra_controls ).show();
     }
 
     // Plot
@@ -362,7 +370,8 @@ jQuery(function ($) {
         .toggleClass( 'inactive', !loan2.active )
         ;
 
-    plot( [ loan1, loan2 ], display_driver );
+    current_data = [ loan1, loan2 ];
+    plot( current_data, current_driver );
 
   }
 
@@ -373,6 +382,19 @@ jQuery(function ($) {
     .bind( 'blur', update_app )
     .bind( 'focusout', update_app )
     ;
+
+  var minWidth = 1160;
+  var was_narrow;
+  $( window ).bind( 'resize', function (e) {
+    var is_narrow = $( window ).width() < minWidth;
+    if ( is_narrow != was_narrow ) {
+      $( 'body' ).toggleClass( 'narrow', is_narrow );
+    }
+    was_narrow = is_narrow;
+    if ( current_data ) {
+      plot( current_data, current_driver )
+    }
+  }).trigger( 'resize' );
 
   update_app();
 

@@ -24,11 +24,13 @@ input {
 }
 h1 {
   margin : 0;
+  margin : 5px 1%;
 }
 hr {
   border : 0;
   border-top: 1px solid #ddd;
   height : 1px;
+  margin : 5px 1%;
 }
 abbr {
   cursor: help;
@@ -40,12 +42,22 @@ abbr {
 #col1 {
   float : left;
   width : 48%;
-  margin : 0 1%;  
+  margin : 0 1% 10px;  
 }
 #col2 {
-  float : right;
+  float : left;
   width : 48%;
-  margin : 0 1%;  
+  margin : 0 1% 40px;
+}
+.narrow #col1,
+.narrow #col2 {
+  clear : left;
+  float : none;
+  width : auto;
+}
+.narrow #inputform {
+  max-width: 700px;
+  margin : 0 auto;
 }
 
 .context_controls {
@@ -125,5 +137,5 @@ fieldset {
 }
 
 svg {
-  /* border : 1px dotted red; */
+/*  border : 1px dotted red;*/
 }
