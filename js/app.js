@@ -223,6 +223,11 @@ jQuery(function ($) {
       })
       ;
 
+    // prevent floating point artifacts from triggering axis
+    if ( Math.abs( y_min ) > 0 && Math.abs( y_min ) < 1e-8 ) {
+      y_min = 0;
+    }
+
     var fmt_ptn = display_driver.percent ? "#0'%'" : "#,##0.##";
     var fmt = numfmt( fmt_ptn, 'is' );
 
