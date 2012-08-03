@@ -301,13 +301,14 @@ jQuery(function ($) {
         .strokeStyle( x_axis_color )
         ;
 
-    vis.add(pv.Rule)
+    var x_ax = vis.add(pv.Rule)
         .data(x.ticks())
         .left(x)
         .height(5)
         .bottom(-5)
         .strokeStyle( x_axis_color )
-      .anchor("bottom")
+        ;
+    x_ax.anchor("bottom")
         .add(pv.Label)
           .textStyle( x_axis_color )
           .textMargin( 5 )
@@ -331,6 +332,8 @@ jQuery(function ($) {
 
       var active_count = (loans[0].active * 1) + ( loans[1].active * 1);
       var b = pv.Scale.ordinal(pv.range(x_min, x_max+1)).splitBanded(0, w, 5/6);
+
+      x_ax.left(function(d){ return b(d) + (b.range().band / 2); });
 
       var barcolors = [];
       if ( stacks > 1 ) {
