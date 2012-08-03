@@ -206,19 +206,19 @@ jQuery(function ($) {
         var series = loan.payments
               .map( display_driver.calculate, loan )
               .filter(function ( d ) {
-                return isFinite(d.x) && isFinite(d.y);
+                if ( isFinite(d.x) && isFinite(d.y) ) {
+                  if ( d.stack && d.stack.length > stacks ) {
+                    stacks = d.stack.length;
+                  }
+                  if ( y_min > d.y ) { y_min = d.y; }
+                  if ( y_max < d.y ) { y_max = d.y; }
+                  if ( x_min > d.x ) { x_min = d.x; }
+                  if ( x_max < d.x ) { x_max = d.x; }
+                  return true;
+                }
+                return false;
               })
               ;
-        series.forEach(function ( d ) {
-          if ( d.stack && d.stack.length > stacks ) {
-            stacks = d.stack.length;
-          }
-          // FIXME: this is super slow...
-          y_min = Math.min( d.y, y_min );
-          y_max = Math.max( d.y, y_max );
-          x_min = Math.min( d.x, x_min );
-          x_max = Math.max( d.x, x_max );
-        });
         return series;
       })
       ;
