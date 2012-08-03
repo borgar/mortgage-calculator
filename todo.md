@@ -7,11 +7,9 @@
   Esp. important for payments vs. income where we need to
   show bar divided by 12 (monthly average)
 
-* Split and stack interest/installment for payments
-
 * Add a picker for common loans on the market
 
-* Spin-ctrl for inputs in firefox
+* Spin-ctrl for inputs in browsers without input[number] support
 
 * Tolerate "20.000.000" input in inputs?
 

@@ -73,7 +73,10 @@ jQuery(function ($) {
       title: "Afborganir á ári yfir lánstímabil",
       plot: 'bar',
       calculate: function ( d ) {
-        return { x: d.index + 1, y: d.payment_upcalc };
+        return { x: d.index + 1
+               , y: d.amount_payed
+               , stack: [ d.capital_payment, d.interest ]
+               };
       }
     },
     loan_vs_property1: {
@@ -116,7 +119,7 @@ jQuery(function ($) {
       },
       calculate: function ( d ) {
         var upvalue = this.income_post_taxes * ( 1 + this.income_growth * d.index );
-        var y = ( d.payment_upcalc / upvalue ) * 100;
+        var y = ( d.amount_payed / upvalue ) * 100;
         return { x: d.index + 1, y: y };
       }
     },
@@ -130,7 +133,7 @@ jQuery(function ($) {
       },
       calculate: function ( d ) {
         var upvalue = this.income_post_taxes * ( 1 + this.income_growth * d.index );
-        var y = upvalue - d.payment_upcalc;  // TODO: allow negatives?
+        var y = upvalue - d.amount_payed;  // TODO: allow negatives?
         return { x: d.index + 1, y: y };
       }
     }
@@ -192,6 +195,8 @@ jQuery(function ($) {
     var y_max = -Infinity;
     var x_min = Infinity;
     var x_max = -Infinity;
+    var stacks = 0;
+
     var data = loans
       .map(function ( loan ) {
         if ( typeof display_driver.init === 'function' ) {
@@ -205,6 +210,9 @@ jQuery(function ($) {
               })
               ;
         series.forEach(function ( d ) {
+          if ( d.stack && d.stack.length > stacks ) {
+            stacks = d.stack.length;
+          }
           // FIXME: this is super slow...
           y_min = Math.min( d.y, y_min );
           y_max = Math.max( d.y, y_max );
@@ -307,6 +315,7 @@ jQuery(function ($) {
           ;
 
     if ( display_driver.plot === "line" ) {
+
       vis.add( pv.Panel )
           .data( data )
           .add( pv.Line )
@@ -316,29 +325,67 @@ jQuery(function ($) {
             .strokeStyle(function () { return colors[ this.parent.index ]; })
             .lineWidth(2)
             ;
+
     }
     else if ( display_driver.plot === "bar" ) {
+
       var active_count = (loans[0].active * 1) + ( loans[1].active * 1);
       var b = pv.Scale.ordinal(pv.range(x_min, x_max+1)).splitBanded(0, w, 5/6);
+
+      var barcolors = [];
+      if ( stacks > 1 ) {
+        // split data into stacks
+        var ndata = [];
+        data.forEach(function ( ser ) {
+          pv.range( stacks ).forEach(function (i) {
+            var s = ser.map(function ( d ) {
+              return {
+                'x': d.x,
+                'y': d.stack[i],
+                'bottom': pv.sum( d.stack.slice( 0, i ) )
+              }
+            });
+            ndata.push( s );
+          });
+        });
+        data = ndata;
+        colors.forEach(function ( col ) {
+          pv.range( stacks ).forEach(function ( i ) {
+            var c = pv.color( col );
+            barcolors.push( pv.rgb( c.r, c.g, c.b, 0.6 - ( i * 0.15 ) ) );
+          });
+        });
+      }
+      else {
+        stacks = 1;
+        colors.forEach(function ( col ) {
+          var c = pv.color( col );
+          barcolors.push( pv.rgb( c.r, c.g, c.b, 0.6 ) );
+        });
+      }
+
       vis.add( pv.Panel )
           .data( data )
           .add( pv.Bar )
             .data(function(d){ return d; })
             .left(function(d){
               if ( active_count === 2 ) {
-                return b(d.x) + this.parent.index * (b.range().band / 2);
+                return b(d.x) + Math.floor(this.parent.index / stacks) * (b.range().band / 2);
               }
               return b(d.x);
             })
             .height(function(d){
-              return y( Math.abs(d.y) ) - y(0);
+              return y( Math.abs( d.y ) ) - y(0);
             })
             .width( b.range().band / active_count )
             .bottom(function(d){
-              return ( d.y < 0 ) ? y(d.y) : y(0);
+              return ( d.y < 0 ) ? y( d.y ) : y( d.bottom || 0 );
             })
-            .fillStyle(function(){ return colors[ this.parent.index ]; })
+            .fillStyle(function(){
+              return barcolors[ this.parent.index ];
+            })
             ;
+
     }
 
     vis.render();
