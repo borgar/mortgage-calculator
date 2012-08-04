@@ -428,8 +428,19 @@ jQuery(function ($) {
     current_data = [ loan1, loan2 ];
     plot( current_data, current_driver );
 
+    // serialize to hash
+    // NOTE: don't do this naiively because ppl may put their income in, change to something else
+    //       and then share the URL - this would then be leaking their income.
+    var cq = [ '#col1>fieldset:not([id])' ];
+    cq.push( loan1.active ? '#loan1' : '#loan1 legend' );
+    cq.push( loan2.active ? '#loan2' : '#loan2 legend' );
+    if ( current_driver.extra_controls ) {
+      cq.push( '#' + current_driver.extra_controls );
+    }
+    document.location.hash = '!' + $( cq.join(', ') ).to_query();
   }
 
+  // hook updates to pretty much all UI events that do anything
   $( "#inputform" )
     .on( 'submit', function(e) { e.preventDefault(); })
     .bind( 'change', update_app )
@@ -438,6 +449,7 @@ jQuery(function ($) {
     .bind( 'focusout', update_app )
     ;
 
+  // window resize handler
   var minWidth = 1160;
   var was_narrow;
   $( window ).bind( 'resize', function (e) {
@@ -451,6 +463,12 @@ jQuery(function ($) {
     }
   }).trigger( 'resize' );
 
+
+  // reset/read form settings
+  var hash = String( document.location.hash ).replace( /^#?!?/, '' );
+  $( '#inputform' ).apply_query( hash );
+
+  // trigger initial rendering
   update_app();
 
 });
