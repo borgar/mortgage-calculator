@@ -16,7 +16,7 @@
 <body class="">
 <form id="inputform">
 
-  <h1> Lánareiknir </h1>
+  <h1> <a href=".">Lánareiknir</a> </h1>
   <hr>
 
   <div id="col1">
@@ -73,7 +73,7 @@
           <label for="loan2_type">Tegund láns:</label>
           <select id="loan2_type" name="loan2_type">
             <option value="idx_eq">Verðtryggt - Jafnar afborganir</option>
-            <option value="idx_pmt">Verðtryggt - Jafngreiðslur</option>
+            <option selected value="idx_pmt">Verðtryggt - Jafngreiðslur</option>
             <option value="eq">Óverðtryggt - Jafnar afborganir</option>
             <option value="pmt">Óverðtryggt - Jafngreiðslur</option>
           </select>
@@ -81,7 +81,7 @@
         <div class="formcontrol if_index">
           <label for="loan2_interest">Vextir:</label>
           <input id="loan2_interest" name="loan2_interest" size="2"
-              value="15" max="25" min="1" step="1" type="number" />
+              value="5" max="25" min="1" step="1" type="number" />
           <abbr class="unit" title="prósent">%</abbr>
         </div>
       </fieldset>
