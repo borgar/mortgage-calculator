@@ -302,7 +302,7 @@ jQuery(function ($) {
       .anchor("left")
         .add(pv.Label)
           .textStyle( y_axis_color )
-          .text( fmt ) // y.tickFormat
+          .text(function (d) { return !d ? '0 kr.' : fmt( d ) })
           ;
 
     // X-axis
@@ -326,7 +326,9 @@ jQuery(function ($) {
         .add(pv.Label)
           .textStyle( x_axis_color )
           .textMargin( 5 )
-          .text(function(d){ return d.toFixed(); })
+          .text(function(d){
+            return d.toFixed() + ( this.index === 0 ? '. ár' : '' );
+          })
           ;
 
     if ( display_driver.plot === "line" ) {
