@@ -232,7 +232,7 @@ jQuery(function ($) {
     var fmt = numfmt( fmt_ptn, 'is' );
 
     // make sure ranges are finite
-    if ( !isFinite( y_max ) ) { y_max = 1000000; }
+    if ( !isFinite( y_max ) ) { y_max = display_driver.percent ? 100 : 10; }
     if ( !isFinite( y_min ) ) { y_min = 0; }
     if ( !isFinite( x_max ) ) { x_max = 10; }
     if ( !isFinite( x_min ) ) { x_min = 0; }
@@ -257,7 +257,7 @@ jQuery(function ($) {
     var y_axis_bottom = 0;
     var y = y_scale.range( 0, h );
     var n_y_ticks = ~~( h / 25 );
-    var y_ticks = y.ticks( Math.max( 2, n_y_ticks ) );
+    var y_ticks = y.ticks( Math.min( Math.max( 2, n_y_ticks ), 10 ) );
 
     // frame
     var vis = new pv.Panel()
