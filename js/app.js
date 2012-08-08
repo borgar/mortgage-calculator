@@ -442,7 +442,7 @@ jQuery(function ($) {
     // serialize to hash
     // NOTE: don't do this naiively because ppl may put their income in, change to something else
     //       and then share the URL - this would then be leaking their income.
-    var cq = [ '#col1>fieldset:not([id])' ];
+    var cq = [ '#calcview', '#economy' ];
     cq.push( loan1.active ? '#loan1' : '#loan1 legend' );
     cq.push( loan2.active ? '#loan2' : '#loan2 legend' );
     if ( current_driver.extra_controls ) {
