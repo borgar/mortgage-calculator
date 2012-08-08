@@ -66,16 +66,18 @@ jQuery(function ($) {
       title: "Þróun höfuðstóls yfir lánstímabil",
       plot: 'line',
       calculate: function ( d ) {
-        return { x: d.index + 1, y: d.period_captial_end };
+        var mul = this.in_current_value ? d.currency_worth : 1;
+        return { x: d.index + 1, y: d.period_captial_end * mul };
       }
     },
     loan_std_payments: {
       title: "Afborganir á ári yfir lánstímabil",
       plot: 'bar',
       calculate: function ( d ) {
+        var mul = this.in_current_value ? d.currency_worth : 1;
         return { x: d.index + 1
-               , y: d.amount_payed
-               , stack: [ d.capital_payment, d.interest ]
+               , y: d.amount_payed * mul
+               , stack: [ d.capital_payment * mul, d.interest * mul ]
                };
       }
     },
@@ -103,9 +105,10 @@ jQuery(function ($) {
         this.property_value = $( '#property_value' ).val() * 1;
       },
       calculate: function ( d ) {
+        var mul = this.in_current_value ? d.currency_worth : 1;
         var upvalue = this.property_value * ( 1 + this.property_growth * d.index );
         var y = (upvalue - d.period_captial_end);
-        return { x: d.index + 1, y: y };
+        return { x: d.index + 1, y: y * mul };
       }
     },
     loan_vs_income1: {
@@ -132,9 +135,10 @@ jQuery(function ($) {
         this.income_growth     = Number( $( '#income_growth' ).val() ) / 100;
       },
       calculate: function ( d ) {
+        var mul = this.in_current_value ? d.currency_worth : 1;
         var upvalue = this.income_post_taxes * ( 1 + this.income_growth * d.index );
         var y = upvalue - d.amount_payed;  // TODO: allow negatives?
-        return { x: d.index + 1, y: y };
+        return { x: d.index + 1, y: y * mul };
       }
     }
   };
@@ -149,6 +153,7 @@ jQuery(function ($) {
     driver.period    = Number( $( loan_elm_id + '_period' ).val() || 1 );
     driver.inflation = Number( $( '#inflation' ).val() || 0 ) / 100;
     driver.active    = $( loan_elm_id + "_on" )[ 0 ].checked;
+    driver.in_current_value = $( '#value' )[ 0 ].checked;
     return driver;
   }
 
@@ -262,7 +267,6 @@ jQuery(function ($) {
     // frame
     var vis = new pv.Panel()
         .canvas( document.getElementById('plot_area') )
-        //.fillStyle('#ddd')
         .width( w )
         .height( w * aspect )
         .bottom( margin_bottom )
@@ -271,8 +275,13 @@ jQuery(function ($) {
         .top( margin_top )
         ;
 
+    var cv = '';
+    if ( loans[0].in_current_value ) {
+      // núvirtar kr. // fært til verðlags dagsins í dag // ??
+      cv = " (núvirt verðlag)";
+    }
     vis.add(pv.Label)
-        .text( display_driver.title )
+        .text( display_driver.title + cv )
         .top( 0 )
         .textMargin( 10 )
         .textAlign( 'center' )

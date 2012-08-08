@@ -87,14 +87,21 @@
       </fieldset>
     </fieldset>
 
-    <fieldset class="">
-      <legend>Verðbólga:</legend>
+    <fieldset class="" id="economy">
+      <legend>Verðþróun:</legend>
       <div class="formcontrol">
         <label for="inflation">Verðbólga:</label>
         <input id="inflation" name="inflation" size="2"
             value="4" max="30" min="1" step="0.5" type="number" />
         <abbr class="unit" title="prósent">%</abbr>
       </div>
+      <div class="formcontrol formselect formcheck" id="">
+        <label>
+          <input id="value" name="value" value="current" type="checkbox" />
+          Sýna fjárhæðir núvirtar
+        </label>
+      </div>
+
     </fieldset>
 
     <fieldset class="">
