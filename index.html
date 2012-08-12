@@ -21,71 +21,92 @@
 
   <div id="col1">
 
-    <fieldset class="" id="loan1">
-      <legend><label><input type="checkbox" id="loan1_on" checked> Lán 1:</label></legend>
-      <div class="formcontrol">
-        <label for="loan1_principal">Lánsfjárhæð:</label>
-        <input id="loan1_principal" name="loan1_principal" size="10"
-            value="20000000" min="1000000" step="1000000" type="number" />
-        <abbr class="unit" title="krónur">kr.</abbr>
+    <fieldset class="" id="l1wrap">
+      <legend><label><input type="checkbox" id="l1" checked> Lánasafn 1:</label></legend>
+      <input id="l1n" name="l1n" type="hidden" value="1">
+
+      <table cellspacing="0">
+        <thead>
+          <tr>
+            <th>&nbsp;</th>
+            <th>Lánsfjárhæð</th>
+            <th>Tímabil</th>
+            <th>Tegund láns</th>
+            <th>Vextir</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody id="l1body">
+
+          <tr id="l1(1)row">
+            <td class="formcontrol formselect formcheck">
+              <label>
+                <input id="l1(1)" name="l1(1)" value="on" type="checkbox" checked />
+              </label>
+            </td>
+            <td class="formcontrol">
+              <input id="l1(1)principal" name="l1(1)principal" size="10"
+                  value="20000000" min="1000000" step="1000000" type="number" />
+              <abbr class="unit" title="krónur">kr.</abbr>
+            </td>
+            <td class="formcontrol">
+              <input id="l1(1)period" name="l1(1)period" size="2"
+                  value="40" max="60" min="5" step="1" type="number" />
+              <span class="unit">ár</span>
+            </td>
+            <td class="formcontrol formselect">
+              <select id="l1(1)type" name="l1(1)type">
+                <option value="idx_eq">Verðtryggt - Jafnar afborganir</option>
+                <option value="idx_pmt">Verðtryggt - Jafngreiðslur</option>
+                <option value="eq">Óverðtryggt - Jafnar afborganir</option>
+                <option value="pmt">Óverðtryggt - Jafngreiðslur</option>
+              </select>
+            </td>
+            <td class="formcontrol">
+              <input id="l1(1)interest" name="l1(1)interest" size="2"
+                  value="5" max="25" min="1" step="1" type="number" />
+              <abbr class="unit" title="prósent">%</abbr>
+            </td>
+            <td class="actions">
+              <button data-action="delete-loan">✖</button>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div class="buttons">
+        <button data-action="add-loan">Bæta við láni</button>
       </div>
-      <div class="formcontrol">
-        <label for="loan1_period">Tímabil:</label>
-        <input id="loan1_period" name="loan1_period" size="2"
-            value="40" max="60" min="5" step="1" type="number" />
-        <span class="unit">ár</span>
-      </div>
-      <fieldset class="">
-        <div class="formcontrol formselect">
-          <label for="loan1_type">Tegund láns:</label>
-          <select id="loan1_type" name="loan1_type">
-            <option value="idx_eq">Verðtryggt - Jafnar afborganir</option>
-            <option value="idx_pmt">Verðtryggt - Jafngreiðslur</option>
-            <option value="eq">Óverðtryggt - Jafnar afborganir</option>
-            <option value="pmt">Óverðtryggt - Jafngreiðslur</option>
-          </select>
-        </div>
-        <div class="formcontrol">
-          <label for="loan1_interest">Vextir:</label>
-          <input id="loan1_interest" name="loan1_interest" size="2"
-              value="5" max="25" min="1" step="1" type="number" />
-          <abbr class="unit" title="prósent">%</abbr>
-        </div>
-      </fieldset>
+
     </fieldset>
 
-    <fieldset class="" id="loan2">
-      <legend><label><input type="checkbox" id="loan2_on"> Lán 2:</label></legend>
-      <div class="formcontrol">
-        <label for="loan2_principal">Lánsfjárhæð:</label>
-        <input id="loan2_principal" name="loan2_principal" size="10"
-            value="20000000" min="1000000" step="1000000" type="number" />
-        <abbr class="unit" title="krónur">kr.</abbr>
+
+    <fieldset class="" id="l2wrap">
+      <legend><label><input type="checkbox" id="l2"> Lánasafn 2:</label></legend>
+      <input id="l2n" name="l2n" type="hidden" value="1">
+
+      <table cellspacing="0">
+        <thead>
+          <tr>
+            <th>&nbsp;</th>
+            <th>Lánsfjárhæð</th>
+            <th>Tímabil</th>
+            <th>Tegund láns</th>
+            <th>Vextir</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody id="l2body"></tbody>
+      </table>
+
+      <div class="buttons">
+        <button data-action="add-loan">Bæta við láni</button>
       </div>
-      <div class="formcontrol">
-        <label for="loan2_period">Tímabil:</label>
-        <input id="loan2_period" name="loan2_period" size="2"
-            value="40" max="60" min="5" step="1" type="number" />
-        <span class="unit">ár</span>
-      </div>
-      <fieldset class="">
-        <div class="formcontrol formselect">
-          <label for="loan2_type">Tegund láns:</label>
-          <select id="loan2_type" name="loan2_type">
-            <option value="idx_eq">Verðtryggt - Jafnar afborganir</option>
-            <option selected value="idx_pmt">Verðtryggt - Jafngreiðslur</option>
-            <option value="eq">Óverðtryggt - Jafnar afborganir</option>
-            <option value="pmt">Óverðtryggt - Jafngreiðslur</option>
-          </select>
-        </div>
-        <div class="formcontrol if_index">
-          <label for="loan2_interest">Vextir:</label>
-          <input id="loan2_interest" name="loan2_interest" size="2"
-              value="5" max="25" min="1" step="1" type="number" />
-          <abbr class="unit" title="prósent">%</abbr>
-        </div>
-      </fieldset>
+
     </fieldset>
+
+
 
     <fieldset class="" id="economy">
       <legend>Verðþróun:</legend>

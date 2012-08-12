@@ -21,6 +21,7 @@ select {
 input {
   padding : 3px 4px;
   box-shadow: 1px 1px 5px #ccc inset;
+  border-radius : 3px;
 }
 h1 {
   margin : 0;
@@ -76,24 +77,29 @@ fieldset {
   clear: both;
 }
 
-#loan1, #loan2 {
-  float : left;
-  clear:  none;
-  width : 49.5%;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  select {
-    width : 65%;
-  }
-  .formcontrol label {
-    display: inline-block;
-    width : 30%;
-    text-align : right;
-  }
+
+table {
+  width : 100%;
 }
-#loan2 {
-  float : right;
+th, td {
+  text-align : left;
+  padding : 4px 0;
+  border-bottom: 1px solid #ccc;
 }
+td.actions {
+  text-align : right;
+}
+
+.buttons {
+  padding : 6px 0;
+  text-align : right;
+  margin-bottom: 2px;
+}
+
+tr:only-child button[data-action] {
+  visibility: hidden;
+}
+
 
 fieldset.inactive {
   color : #999;

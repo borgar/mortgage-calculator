@@ -23,6 +23,9 @@
     if ( ctrl.type === 'checkbox' ) {
       val = ctrl.defaultChecked ? ctrl.value : '';
     }
+    else if ( ctrl.type === 'hidden' ) {
+      val = ''; // hidden values don't track defaults
+    }
     // TODO: radio
     else if ( ctrl.type === 'select-one' ) {
       var d = -1;
@@ -100,7 +103,10 @@
           if ( this.type === 'checkbox' ) {
             this.checked = this.defaultChecked;
           }
-          else  {
+          else if ( this.type === 'hidden' ) {
+            //this.value = getDefaultValue( this );
+          }
+          else {
             this.value = getDefaultValue( this );
           }
         }

@@ -4,6 +4,37 @@ numfmt.locale['is'] = {
 , decimal_separator   : ','
 };
 
+jQuery.fn.collectionId = function ( nid ) {
+  if ( nid ) {
+    return this.each(function () {
+      this.id = this.id.replace( /^l\d+/, nid );
+      if ( this.name ) {
+        this.name = this.name.replace( /^l\d+/, nid );
+      }
+    });
+  }
+  var id = this[0] ? this[0].id : '';
+  return id.replace( /^(l\d+).*/, '$1' );
+};
+
+jQuery.fn.loanId = function ( nid ) {
+  if ( nid ) {
+    return this.each(function () {
+      this.id = this.id.replace( /^l\d+\(\d+\)/, nid );
+      if ( this.name ) {
+        this.name = this.name.replace( /^l\d+\(\d+\)/, nid );
+      }
+    });
+    // this.id = id.replace( /^l\d+\(\d+\)/, nid );
+    return this;
+  }
+  var id = this[0] ? this[0].id : '';
+  var i = Number( id.replace( /^.+\((\d+)\).*$/, '$1' ) );
+  if ( !isFinite( i ) ) { i = 0; };
+  return i;
+};
+
+
 // run app
 jQuery(function ($) {
 
@@ -15,6 +46,12 @@ jQuery(function ($) {
   var colors = [ '#000099', '#ed561b' ];
   var current_data;
   var current_driver;
+
+  // get loan row template
+  var tmplElm = $( 'table tr[id$=\\)row]' );
+  var loan_tmpl = $( '<div></div>' ).append( tmplElm[0] ).html().split( /l\d\(\d\)/ );
+  tmplElm.remove(); delete tmplElm;
+
 
   // these are called by the amortizer to calculate each payment
   // the init/calculate functions are called with this === loan, first parameter === payment row
@@ -143,18 +180,59 @@ jQuery(function ($) {
     }
   };
 
+  // helper functions to get/put data into form
+  function update_loans ( id ) {
+    var loans = 0;
+    $( '#' + id + 'wrap' )
+      .find( 'tr[id^='+id+']' )
+        .each(function () {
+          var pre = id + '(' + (loans++) + ')';
+          $( this ).loanId( pre )
+            .find( '*[id^='+id+'\\(]' ).loanId( pre );
+        })
+        ;
+    $( '#' + id + 'n' ).val( loans );
+  }
+
+  function add_loan ( c ) {
+    $( '#' + c + 'body' ).append( loan_tmpl.join( c + '(0)' ) );
+  }
+
+  function loans_count ( c, n ) {
+    var elm = $( '#' + c + 'n' );
+    if ( n != null ) {
+      elm.val( n );
+    }
+    else {
+      n = Number( elm.val() );
+      if ( !isFinite( n ) || !n ) { n = 0; };
+    }
+    return n;
+  }
+
 
   // read the properties of a loan for the UI and return a customized "driver"
-  function get_loan_properties ( loan_elm_id ) {
-    var type = $( loan_elm_id + '_type' ).val();
+  function get_loan_properties ( id, collection ) {
+    var type = $( '#' + id + 'type' ).val();
     var driver = $.extend( {}, loan_drivers[ type ] );
-    driver.principal = Number( $( loan_elm_id + '_principal' ).val() || 0 );
-    driver.interest  = Number( $( loan_elm_id + '_interest' ).val() || 0 ) / 100;
-    driver.period    = Number( $( loan_elm_id + '_period' ).val() || 1 );
-    driver.inflation = Number( $( '#inflation' ).val() || 0 ) / 100;
-    driver.active    = $( loan_elm_id + "_on" )[ 0 ].checked;
-    driver.in_current_value = $( '#value' )[ 0 ].checked;
+    driver.principal = Number( $( '#' + id + 'principal' ).val() || 0 );
+    driver.interest  = Number( $( '#' + id + 'interest' ).val() || 0 ) / 100;
+    driver.period    = Number( $( '#' + id + 'period' ).val() || 1 );
+    driver.active    = collection.active && $( '#' + id )[ 0 ].checked;
+    driver.inflation = collection.inflation;
+    driver.in_current_value = collection.in_current_value;
     return driver;
+  }
+
+  function get_collection_properties ( id ) {
+    var collection = {};
+    collection.active = $( '#' + id )[ 0 ].checked;
+    collection.inflation = Number( $( '#inflation' ).val() || 0 ) / 100;
+    collection.in_current_value = $( '#value' )[ 0 ].checked;
+    collection.loans = pv.range( loans_count( id ) ).map(function (i) {
+      return get_loan_properties( id + '\\(' + i + '\\)', collection );
+    });
+    return collection;
   }
 
 
@@ -192,6 +270,47 @@ jQuery(function ($) {
     return loan;
   }
 
+  function sum_loans ( collection ) {
+
+    // make a copy of the first active one
+    var period = 0;
+    var principal = 0;
+    var loans = collection.loans.filter(function(d){
+      if ( d.active ) {
+        if ( d.period > period ) {
+          period = d.period;
+        }
+        principal += d.principal;
+      }
+      return d.active;
+    });
+    var payments = [];
+    for (var p=0; p<period; p++) {
+
+      var payment = $.extend( {}, loans[0].payments[p] );
+      for (var li=1,ll=loans.length; li<ll; li++) {
+        var px = loans[li].payments[p];
+        if ( px ) {
+          payment.amount_payed += px.amount_payed;
+          payment.capital_payment += px.capital_payment;
+          payment.interest += px.interest;
+          payment.payment_upcalc += px.payment_upcalc;
+          payment.period_captial_end +=  px.period_captial_end;
+          payment.period_captial_start += px.period_captial_start;
+        }
+      }
+      payments.push( payment );
+    }
+    var r = {
+      active: !!payments.length,
+      in_current_value: collection.loans[0].in_current_value,
+      payments: payments,
+      period: period,
+      principal: principal
+    };
+    return r;
+  }
+
 
 
   function plot ( loans, display_driver ) {
@@ -208,7 +327,7 @@ jQuery(function ($) {
           display_driver.init.call( loan );
         }
         if ( !loan.active ) { return []; }
-        var series = loan.payments
+          var series = loan.payments
               .map( display_driver.calculate, loan )
               .filter(function ( d ) {
                 if ( isFinite(d.x) && isFinite(d.y) ) {
@@ -227,6 +346,7 @@ jQuery(function ($) {
         return series;
       })
       ;
+
 
     // prevent floating point artifacts from triggering axis
     if ( Math.abs( y_min ) > 0 && Math.abs( y_min ) < 1e-8 ) {
@@ -248,7 +368,7 @@ jQuery(function ($) {
       , margin_right = 10
       , margin_bottom = 20
       , margin_left = 65
-      , w = fit_space - (margin_left + margin_right) // 480
+      , w = fit_space - ( margin_left + margin_right ) // 480
       , aspect = 1 / 1.618
       , h = w * aspect
       , x_scale = pv.Scale.linear( x_min, x_max )
@@ -424,31 +544,35 @@ jQuery(function ($) {
     }
 
     // Plot
-    var loan1 = amortize( get_loan_properties( "#loan1" ) );
-    $( '#loan1' )
-        .css( 'border-color', loan1.active ? colors[0] : '' )
-        .toggleClass( 'inactive', !loan1.active )
+    var collection1 = get_collection_properties( 'l1' );
+    collection1.loans.forEach( amortize );
+    $( '#l1wrap' )
+        .css( 'border-color', collection1.active ? colors[0] : '' )
+        .toggleClass( 'inactive', !collection1.active )
         ;
 
-    var loan2 = amortize( get_loan_properties( "#loan2" ) );
-    $( '#loan2' )
-        .css( 'border-color', loan2.active ? colors[1] : '' )
-        .toggleClass( 'inactive', !loan2.active )
+    var collection2 = get_collection_properties( 'l2' );
+    collection2.loans.forEach( amortize );
+    $( '#l2wrap' )
+        .css( 'border-color', collection2.active ? colors[1] : '' )
+        .toggleClass( 'inactive', !collection2.active )
         ;
 
-    current_data = [ loan1, loan2 ];
+    // TODO: fork in the road - small multiples for collections, or one with both?
+    current_data = [ sum_loans( collection1 ), collection2.loans[0] ];
     plot( current_data, current_driver );
 
     // serialize to hash
     // NOTE: don't do this naiively because ppl may put their income in, change to something else
     //       and then share the URL - this would then be leaking their income.
     var cq = [ '#calcview', '#economy' ];
-    cq.push( loan1.active ? '#loan1' : '#loan1 legend' );
-    cq.push( loan2.active ? '#loan2' : '#loan2 legend' );
+    cq.push( collection1.active ? '#l1wrap' : '#l1wrap legend' );
+    cq.push( collection2.active ? '#l2wrap' : '#l2wrap legend' );
     if ( current_driver.extra_controls ) {
       cq.push( '#' + current_driver.extra_controls );
     }
-    document.location.hash = '!' + $( cq.join(', ') ).to_query();
+    var q = $( cq.join(', ') ).to_query();
+    document.location.hash = q ? '!' + q : '';
   }
 
   // hook updates to pretty much all UI events that do anything
@@ -458,6 +582,21 @@ jQuery(function ($) {
     .bind( 'submit', update_app )
     .bind( 'blur', update_app )
     .bind( 'focusout', update_app )
+    .on( 'click', 'button[data-action=add-loan]', function (e) {
+      var c_id = $( e.target ).closest( 'fieldset' ).collectionId();
+      add_loan( c_id );
+      update_loans( c_id );
+      update_app();
+    })
+    .on( 'click', 'button[data-action=delete-loan]', function (e) {
+      var row = $( e.target ).closest( 'tr' );
+      var c_id = row.collectionId();
+      if ( loans_count( c_id ) > 1 ) {
+        row.remove();
+        update_loans( c_id );
+        update_app();
+      }
+    })
     ;
 
   // window resize handler
@@ -478,6 +617,17 @@ jQuery(function ($) {
   // reset/read form settings
   var hash = String( document.location.hash ).replace( /^#?!?/, '' );
   $( '#inputform' ).apply_query( hash );
+
+  [ 'l1', 'l2' ].forEach(function (id) {
+    for (var l=0,n=loans_count( id ); l<n; l++) {
+      add_loan( id );
+    }
+    update_loans( id );
+  });
+
+  $( '#inputform' ).apply_query( hash );
+
+
 
   // trigger initial rendering
   update_app();
