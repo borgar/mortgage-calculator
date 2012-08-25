@@ -331,22 +331,22 @@ jQuery(function ($) {
           display_driver.init.call( loan );
         }
         if ( !loan.active ) { return []; }
-          var series = loan.payments
-              .map( display_driver.calculate, loan )
-              .filter(function ( d ) {
-                if ( isFinite(d.x) && isFinite(d.y) ) {
-                  if ( d.stack && d.stack.length > stacks ) {
-                    stacks = d.stack.length;
-                  }
-                  if ( y_min > d.y ) { y_min = d.y; }
-                  if ( y_max < d.y ) { y_max = d.y; }
-                  if ( x_min > d.x ) { x_min = d.x; }
-                  if ( x_max < d.x ) { x_max = d.x; }
-                  return true;
+        var series = loan.payments
+            .map( display_driver.calculate, loan )
+            .filter(function ( d ) {
+              if ( isFinite(d.x) && isFinite(d.y) ) {
+                if ( d.stack && d.stack.length > stacks ) {
+                  stacks = d.stack.length;
                 }
-                return false;
-              })
-              ;
+                if ( y_min > d.y ) { y_min = d.y; }
+                if ( y_max < d.y ) { y_max = d.y; }
+                if ( x_min > d.x ) { x_min = d.x; }
+                if ( x_max < d.x ) { x_max = d.x; }
+                return true;
+              }
+              return false;
+            })
+            ;
         return series;
       })
       ;
