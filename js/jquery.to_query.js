@@ -82,7 +82,7 @@
         .forEach(function ( s ) {
           var m = /^([^=]+)=(.*)$/.exec( s );
           if ( m ) {
-            param[ m[1] ] = m[2];
+            param[ decodeURIComponent(m[1]) ] = decodeURIComponent(m[2]);
           }
         })
         ;
