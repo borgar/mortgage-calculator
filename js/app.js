@@ -563,7 +563,7 @@ jQuery(function ($) {
         ;
 
     // TODO: fork in the road - small multiples for collections, or one with both?
-    current_data = [ sum_loans( collection1 ), collection2.loans[0] ];
+    current_data = [ sum_loans( collection1 ), sum_loans( collection2 ) ];
     plot( current_data, current_driver );
 
     // serialize to hash
