@@ -271,7 +271,9 @@ jQuery(function ($) {
   }
 
   function sum_loans ( collection ) {
-
+    function add ( a, b, key ) {
+      a[ key ] = (a[ key ] || 0) + (b[ key ] || 0);
+    }
     // make a copy of the first active one
     var period = 0;
     var principal = 0;
@@ -287,19 +289,21 @@ jQuery(function ($) {
     var payments = [];
     for (var p=0; p<period; p++) {
 
-      var payment = $.extend( {}, loans[0].payments[p] );
+      var pm = $.extend( {}, loans[0].payments[p] );
       for (var li=1,ll=loans.length; li<ll; li++) {
         var px = loans[li].payments[p];
         if ( px ) {
-          payment.amount_payed += px.amount_payed;
-          payment.capital_payment += px.capital_payment;
-          payment.interest += px.interest;
-          payment.payment_upcalc += px.payment_upcalc;
-          payment.period_captial_end +=  px.period_captial_end;
-          payment.period_captial_start += px.period_captial_start;
+          add( pm, px, 'amount_payed' );
+          add( pm, px, 'capital_payment' );
+          add( pm, px, 'interest' );
+          add( pm, px, 'payment_upcalc' );
+          add( pm, px, 'period_captial_end' );
+          add( pm, px, 'period_captial_start' );
+          pm.index = p;
+          pm.currency_worth = pm.currency_worth || px.currency_worth;
         }
       }
-      payments.push( payment );
+      payments.push( pm );
     }
     var r = {
       active: !!payments.length,
